@@ -10,10 +10,10 @@ namespace TestNetChallenge
         {
             // Arrange
             var mockClients = new Mock<IHubCallerClients>();
-            var mockClientProxy = new Mock<IClientProxy>();
+            var mockGroupProxy = new Mock<IClientProxy>();
 
-            // Configure the mock to return the client proxy
-            mockClients.Setup(clients => clients.All).Returns(mockClientProxy.Object);
+            // Configure the mock to return the group proxy
+            mockClients.Setup(clients => clients.Group("1")).Returns(mockGroupProxy.Object);
 
             var mockContext = new Mock<HubCallerContext>();
             mockContext.Setup(c => c.User.Identity.Name).Returns("TestUser");
@@ -29,15 +29,15 @@ namespace TestNetChallenge
             string message = "Hello, world!";
 
             // Act
-            await chatHub.SendMessage(message);
+            await chatHub.SendMessage("1", message);
 
             // Assert
-            mockClientProxy.Verify(
+            mockGroupProxy.Verify(
                 proxy => proxy.SendCoreAsync(
                     "ReceiveMessage",
                     It.Is<object[]>(o =>
-                        (string)o[0] == "TestUser" &&
-                        (string)o[1] == message),
+                        (string)o[1] == "TestUser" &&
+                        (string)o[2] == message),
                     default),
                 Times.Once);
         }
