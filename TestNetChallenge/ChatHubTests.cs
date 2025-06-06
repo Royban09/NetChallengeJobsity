@@ -41,5 +41,43 @@ namespace TestNetChallenge
                     default),
                 Times.Once);
         }
+
+        [Fact]
+        public async Task SendMessage_WithStockCommand_ShouldBroadcastMessageAndPublish()
+        {
+            // Arrange
+            var mockClients = new Mock<IHubCallerClients>();
+            var mockGroupProxy = new Mock<IClientProxy>();
+
+            mockClients.Setup(clients => clients.Group("1")).Returns(mockGroupProxy.Object);
+
+            var mockContext = new Mock<HubCallerContext>();
+            mockContext.Setup(c => c.User.Identity.Name).Returns("TestUser");
+
+            var mockMessageQueue = new Mock<IMessageQueue>();
+
+            var chatHub = new ChatHub(mockMessageQueue.Object)
+            {
+                Clients = mockClients.Object,
+                Context = mockContext.Object
+            };
+
+            string message = "Check this /stock=aapl.us";
+
+            // Act
+            await chatHub.SendMessage("1", message);
+
+            // Assert
+            mockGroupProxy.Verify(
+                proxy => proxy.SendCoreAsync(
+                    "ReceiveMessage",
+                    It.Is<object[]>(o =>
+                        (string)o[1] == "TestUser" &&
+                        (string)o[2] == message),
+                    default),
+                Times.Once);
+
+            mockMessageQueue.Verify(mq => mq.Publish("aapl.us", "1"), Times.Once);
+        }
     }
 }
