@@ -40,6 +40,20 @@ public class ChatHub : Hub
         var user = Context.User.Identity.Name ?? "Anonymous";
         var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
+        if (Chats.TryGetValue(chatId, out var messages))
+        {
+            messages.Add(new()
+            {
+                Timestamp = timestamp,
+                User = user,
+                MessageText = message
+            });
+
+            if (messages.Count > 50) messages.RemoveAt(0);
+        }
+
+        await Clients.Group(chatId).SendAsync("ReceiveMessage", chatId, user, message, timestamp);
+
         if (message.Contains("/stock="))
         {
             var startIndex = message.IndexOf("/stock=") + "/stock=".Length;
@@ -50,22 +64,6 @@ public class ChatHub : Hub
                 : message[startIndex..endIndex];
 
             _messageQueue.Publish(stockCode, chatId);
-        }
-        else
-        {
-            if (Chats.TryGetValue(chatId, out var messages))
-            {
-                messages.Add(new()
-                { 
-                    Timestamp = timestamp,
-                    User = user,
-                    MessageText = message
-                });
-
-                if (messages.Count > 50) messages.RemoveAt(0);
-            }
-
-            await Clients.Group(chatId).SendAsync("ReceiveMessage", chatId, user, message, timestamp);
         }
     }
 
