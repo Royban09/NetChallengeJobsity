@@ -20,7 +20,7 @@ Prerequisites
   
 3. Install RabbitMQ
 
-  •	Install Erland/OTP
+  •	Install Erlang/OTP
 
   •	Install RabbitMQ and ensure the management plugin is enabled:	
   
