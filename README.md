@@ -79,7 +79,7 @@ Chat Functionality
 
 5. StockBot Command
 
-  •	In any chatroom, users can type /stock=stock_code (e.g., /stock=aapl.us) to fetch stock quotes. This command can be use in any part of the message.
+  •	In any chatroom, users can type /stock=stock_code (e.g., /stock=aapl.us) to fetch stock quotes. This command can be used in any part of the message.
   
   •	The bot	 processes the request and replies with the stock's latest closing price e.g.,
 
